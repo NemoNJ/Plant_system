@@ -15,11 +15,9 @@
   if (uxr_millis() - init > MS) { X; init = uxr_millis();} \
 } while (0)
 
-const int servo1Pin = 13;
-const int servo2Pin = 14;
-ESP32PWM servo1;
-ESP32PWM servo2;
-int freq = 1000;
+Servo myservo[2]; // Create an array of Servo objects
+int servoPin[2] = {13,14};
+int pos = 0;
 
 bool servoActionCompleted = true;
 int lastAutoPlantValue = 0;
@@ -69,15 +67,9 @@ void setup() {
   
   set_microros_serial_transports(Serial);
   Serial.println("MicroROS transports set");
-
+  myservo[0].attach(servoPin[0], 400, 2400);
+  myservo[1].attach(servoPin[1], 400, 2400);
   // Allow allocation of all timers
-	ESP32PWM::allocateTimer(0);
-	ESP32PWM::allocateTimer(1);
-	ESP32PWM::allocateTimer(2);
-	ESP32PWM::allocateTimer(3);
-	Serial.begin(115200);
-	servo1.attachPin(servo1Pin, freq, 10); // 1KHz 10 bits
-  servo2.attachPin(servo2Pin, freq, 10); // 1KHz 10 bits
 }
 
 void loop() {
@@ -131,53 +123,18 @@ void auto_plant_callback(const void *msgin) {
   }
   lastAutoPlantValue = msg->data;
 }
-float degreeToBrightness(float angle) {
-  // ตรวจสอบว่ามุมเป็นค่าที่ถูกต้องระหว่าง 0 ถึง 180 องศา
-  if (angle < 0) angle = 0;
-  if (angle > 180) angle = 180;
-  // แปลงมุมจาก 0-180 องศา ไปเป็นค่า brightness ที่อยู่ระหว่าง 0.0 ถึง 1.0
-  return angle / 180.0;  
-}
 
 void moveServos() {
-// fade the LED on thisPin from off to brightest:
-	for (float brightness = 0; brightness <= 0.5; brightness += 0.001) {
-		// Write a unit vector value from 0.0 to 1.0
-		servo2.writeScaled(brightness);
-		delay(2);
-	}
-	//delay(1000);
-	// fade the LED on thisPin from brithstest to off:
-	for (float brightness = 0.5; brightness >= 0; brightness -= 0.001) {
-		freq += 10;
-		// Adjust the frequency on the fly with a specific brightness
-		// Frequency is in herts and duty cycle is a unit vector 0.0 to 1.0
-		servo2.adjustFrequency(freq, brightness); // update the time base of the PWM
-		delay(2);
-	}
-	// pause between LEDs:
-	delay(1000);
-	freq = 1000;
-	servo2.adjustFrequency(freq, 0.0);    // reset the time base
-	// fade the LED on thisPin from off to brightest: 
-  // for (int pos = 0; pos <= 180; pos++) {
-  //   // servo1.writeScaled(degreeToBrightness(pos)); // 90 degrees for servo1  
-  //   // servo1.adjustFrequency(freq, degreeToBrightness(pos));
-  //   servo2.writeScaled(degreeToBrightness(pos)); // 90 degrees for servo2
-  // 	// servo2.adjustFrequency(freq, degreeToBrightness(pos));
-  //   delay(15);          // รอ 15 ms เพื่อให้เซอร์โวหมุน
-  // }
-
-  // delay(1000);  // รอ 1 วินาที
-
-  // // หมุนเซอร์โวจาก 180 องศากลับไปที่ 0 องศา
-  // for (int pos = 180; pos >= 0; pos--) {
-  //   // servo1.writeScaled(degreeToBrightness(pos)); // 90 degrees for servo1  
-  //   // servo1.adjustFrequency(freq, degreeToBrightness(pos));
-  //   servo2.writeScaled(degreeToBrightness(pos)); // 90 degrees for servo2
-  //   // servo2.adjustFrequency(freq, degreeToBrightness(pos));
-  //   delay(15);          // รอ 15 ms เพื่อให้เซอร์โวหมุน
-  // }
+  for (pos = 0; pos <= 180; pos += 1) {
+    myservo[0].write(pos);
+    myservo[1].write(pos);
+    delay(15);
+  }
+  for (pos = 180; pos >= 0; pos -= 1) {
+    myservo[0].write(pos);
+    myservo[1].write(pos);
+    delay(15);
+  }
 }
 
 bool createEntities() {
