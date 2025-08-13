@@ -5,7 +5,7 @@ computer
 (myvenv) jirayu@jirayu-Vivobook-ASUSLaptop-K5404VA-S5404VA:~$ cd Robot_Project_271391/robot_ws/src/
 (myvenv) jirayu@jirayu-Vivobook-ASUSLaptop-K5404VA-S5404VA:~/Robot_Project_271391/robot_ws/src$ python3 Robot_keyboard.py 
 
-pi
+pi : ssh Nemo@192.168.0.209
 (venv) Nemo@Nemorobot:~$ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
 (venv) Nemo@Nemorobot:~$ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB1
 
