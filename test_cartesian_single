@@ -1,0 +1,48 @@
+#include <AccelStepper.h>
+
+// -------------------- CONFIG --------------------
+#define motorInterfaceType 1   // DRIVER mode (STEP + DIR)
+// #define stepPin 26              // ขา STEP 200
+// #define dirPin 27               // ขา DIR 200
+// #define EN_PIN 25               // ขา EN 200
+#define EN_PIN 12               // ขา EN 150
+#define stepPin 32              // ขา STEP 150
+#define dirPin 33              // ขา DIR 150
+
+// กำหนดค่ามอเตอร์กับ lead screw
+const int motorStepsPerRev = 200;   // step ต่อรอบ (NEMA 11 ส่วนใหญ่ 200 step/rev)
+const int microstepping = 4;       // microstep ที่ตั้งใน driver (เช่น A4988 jumper = 1/16)
+const float leadScrewPitch = 8.0;   // หมุน 1 รอบ = 4 mm
+
+// คำนวณ steps ต่อ mm
+const float stepsPerMM = (motorStepsPerRev * microstepping) / leadScrewPitch;
+
+// -------------------------------------------------
+AccelStepper stepper(motorInterfaceType, stepPin, dirPin);
+// ฟังก์ชันสั่งเลื่อนระยะเป็น mm
+void moveMM(float distance_mm) {
+  long targetSteps = distance_mm * stepsPerMM;  
+  stepper.moveTo(targetSteps);
+  stepper.runToPosition();
+}
+void move_stepper(){
+  stepper.enableOutputs();
+  moveMM(70.0);   // เดินหน้า 10 mm 0-203 0-153
+  delay(10000);
+  moveMM(0.0); 
+  stepper.disableOutputs();
+  delay(10000);
+}
+void setup() {
+  stepper.setEnablePin(EN_PIN);
+  stepper.enableOutputs();
+  stepper.setMaxSpeed(4000);       // step/sec
+  stepper.setAcceleration(2000);    // step/sec^2
+  stepper.setCurrentPosition(0);   // set ตำแหน่งเริ่มต้น
+  stepper.setPinsInverted(false, false, true);
+  stepper.disableOutputs();
+}
+
+void loop() {
+  move_stepper();
+}
