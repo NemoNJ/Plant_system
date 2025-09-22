@@ -1,0 +1,3 @@
+nmcli device disconnect wlo1
+nmcli device wifi connect "nemo4545" password "PASSWORD" ifname wlx8c86dd71b1c7 name "nemo4545-AC1300"
+nmcli device status
